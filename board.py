@@ -3,7 +3,7 @@ from pieces import *
 from move import *
 import numpy as np
 
-#hello!
+#hello!gg
 
 data1 = {
     'a': [None]*8,
