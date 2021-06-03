@@ -1,7 +1,9 @@
 import pandas as pd
 from pieces import *
 from move import *
+from detection import *
 import numpy as np
+from copy import deepcopy
 
 #hello!gg
 
@@ -24,6 +26,7 @@ class Board:
         self.piece_order = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']
         self.turn = turn
         self.data.index = self.data.index + 1
+        self.last_board = None
 
     def place_piece(self, file, rank, color='empty', shape=None):
         self.data[file][rank] = Piece(file, rank, color, shape)
@@ -40,10 +43,22 @@ class Board:
         self.turn = 'white'
 
     def execute_move(self, move):
+
         piece = self.data[move.start_file][move.start_rank]
+
+        self.last_board = deepcopy(self)
         self.data[move.end_file][move.end_rank] = piece
         self.data[move.start_file][move.start_rank] = Piece(move.start_file, move.start_rank)
         print('moves ' + piece.label + ' to ' + move.end_file + str(move.end_rank))
+
+    def go_back(self):
+        # reverts last move
+        if self.last_board is not None:
+            self.data = self.last_board.data
+            self.turn = self.last_board.turn
+            self.last_board = self.last_board.last_board
+        else:
+            print("fuck off its move 1")
 
     def summarise(self):
         display = self.data.copy()
@@ -55,8 +70,12 @@ class Board:
 
 test_board = Board(data1, 'white')
 test_board.set_board()
-test_board.summarise()
 
+test_board.go_back()
 test_move = Move(2, 'e', 4, 'e')
 test_board.execute_move(test_move)
 test_board.summarise()
+test_board.go_back()
+test_board.summarise()
+test_board.go_back()
+
