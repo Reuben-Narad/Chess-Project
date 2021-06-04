@@ -4,8 +4,7 @@ from move import *
 from detection import *
 import numpy as np
 from copy import deepcopy
-
-#hello!gg
+import random
 
 data1 = {
     'a': [None]*8,
@@ -43,13 +42,14 @@ class Board:
         self.turn = 'white'
 
     def execute_move(self, move):
-
-        piece = self.data[move.start_file][move.start_rank]
-
         self.last_board = deepcopy(self)
+        piece = self.data[move.start_file][move.start_rank]
         self.data[move.end_file][move.end_rank] = piece
+        piece.rank = move.end_rank
+        piece.file = move.end_file
         self.data[move.start_file][move.start_rank] = Piece(move.start_file, move.start_rank)
-        print('moves ' + piece.label + ' to ' + move.end_file + str(move.end_rank))
+        print(move.label)
+        self.turn = opposite[self.turn]
 
     def go_back(self):
         # reverts last move
@@ -61,21 +61,29 @@ class Board:
             print("fuck off its move 1")
 
     def summarise(self):
-        display = self.data.copy()
+        display = pd.DataFrame(data={
+            'a': [None] * 8,
+            'b': [None] * 8,
+            'c': [None] * 8,
+            'd': [None] * 8,
+            'e': [None] * 8,
+            'f': [None] * 8,
+            'g': [None] * 8,
+            'h': [None] * 8
+        })
+        display.index += 1
         for n in display:
             for m in range(1, 9):
-                display[n][m] = display[n][m].label
+                display[n][m] = self.data[n][m].label
         print(display)
 
 
-test_board = Board(data1, 'white')
-test_board.set_board()
 
-test_board.go_back()
-test_move = Move(2, 'e', 4, 'e')
-test_board.execute_move(test_move)
+test_board = Board(data1, 'black')
+test_board.set_board()
+test_board.turn = 'white'
+
+for move in range(15):
+    test_board.execute_move(list_moves(test_board)[random.randrange(len(list_moves(test_board)))])
 test_board.summarise()
-test_board.go_back()
-test_board.summarise()
-test_board.go_back()
 

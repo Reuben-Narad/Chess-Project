@@ -21,3 +21,16 @@ class Piece:
         self.rank = rank
         self.file = file
         self.label = color_names[color] + shape_names[shape]
+        self.letter = None
+        if shape == 'rook':
+            self.letter = 'R'
+        if shape == 'knight':
+            self.letter = 'N'
+        if shape == 'bishop':
+            self.letter = 'B'
+        if shape == 'king':
+            self.letter = 'K'
+        if shape == 'queen':
+            self.letter = 'Q'
+        else:
+            self.letter = ''
