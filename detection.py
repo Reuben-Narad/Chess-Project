@@ -18,13 +18,29 @@ def file(file, direction):
     return result
 
 
+def look_at(piece, board, file, rank):
+    if file == 'out':
+        return 'out'
+    if rank == 9 or rank == 0:
+        return 'out'
+    if board.data[file][rank].color == 'empty':
+        return 'empty'
+    if board.data[file][rank].color == opposite[piece.color]:
+        if board.data[file][rank].shape == 'king':
+            return 'xK'
+        else:
+            return 'take'
+    if board.data[file][rank].color == piece.color:
+        return 'block'
+
+
 opposite = {
     'black': 'white',
     'white': 'black'
 }
 
 
-def list_moves(board):
+def list_moves(board, display=False):
     available_moves = []
     for file in board.data:
         for piece in board.data[file]:
@@ -33,10 +49,15 @@ def list_moves(board):
                     available_moves.extend(
                         pawn_detect(piece, board)
                     )
-    a = []
-    for move in available_moves:
-        a.append(move.label)
-    # print(a)
+                if piece.shape == 'rook':
+                    available_moves.extend(
+                        rook_detect(piece, board)
+                    )
+    if display:
+        a = []
+        for move in available_moves:
+            a.append(move.label)
+        print(a)
     return available_moves
 
 
@@ -73,6 +94,83 @@ def pawn_detect(piece, board):
 
 def rook_detect(piece, board):
     moves = []
+    for direction in ['up', 'down', 'right', 'left']:
+        if direction == 'up':
+            selected_file = piece.file
+            selected_rank = piece.rank
+            running = True
+            while running:
+                selected_rank += 1
+                peek = look_at(piece, board, selected_file, selected_rank)
+                if peek == 'out':
+                    running = False
+                if peek == 'block':
+                    running = False
+                if peek == 'take':
+                    moves.append(Move(piece, selected_rank, selected_file, take=True))
+                    running = False
+                if peek == 'empty':
+                    moves.append(Move(piece, selected_rank, selected_file))
+                if peek == 'xK':
+                    moves.append(Move(piece, selected_rank, selected_file, xK=True))
+        if direction == 'down':
+            selected_file = piece.file
+            selected_rank = piece.rank
+            running = True
+            while running:
+                selected_rank -= 1
+                peek = look_at(piece, board, selected_file, selected_rank)
+                if peek == 'out':
+                    running = False
+                if peek == 'block':
+                    running = False
+                if peek == 'take':
+                    moves.append(Move(piece, selected_rank, selected_file, take=True))
+                    running = False
+                if peek == 'empty':
+                    moves.append(Move(piece, selected_rank, selected_file))
+                if peek == 'xK':
+                    moves.append(Move(piece, selected_rank, selected_file, xK=True))
+        if direction == 'right':
+            selected_file = piece.file
+            selected_rank = piece.rank
+            running = True
+            while running:
+                selected_file = file(selected_file, 'right')
+                peek = look_at(piece, board, selected_file, selected_rank)
+                if peek == 'out':
+                    running = False
+                if peek == 'block':
+                    running = False
+                if peek == 'take':
+                    moves.append(Move(piece, selected_rank, selected_file, take=True))
+                    running = False
+                if peek == 'empty':
+                    moves.append(Move(piece, selected_rank, selected_file))
+                if peek == 'xK':
+                    moves.append(Move(piece, selected_rank, selected_file, xK=True))
+        if direction == 'left':
+            selected_file = piece.file
+            selected_rank = piece.rank
+            running = True
+            while running:
+                selected_file = file(selected_file, 'left')
+                peek = look_at(piece, board, selected_file, selected_rank)
+                if peek == 'out':
+                    running = False
+                if peek == 'block':
+                    running = False
+                if peek == 'take':
+                    moves.append(Move(piece, selected_rank, selected_file, take=True))
+                    running = False
+                if peek == 'empty':
+                    moves.append(Move(piece, selected_rank, selected_file))
+                if peek == 'xK':
+                    moves.append(Move(piece, selected_rank, selected_file, xK=True))
+    return(moves)
+
+
+
 
 
 def legal_detect(move, piece, board):

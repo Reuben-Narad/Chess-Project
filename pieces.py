@@ -21,7 +21,20 @@ class Piece:
         self.rank = rank
         self.file = file
         self.label = color_names[color] + shape_names[shape]
-        self.letter = None
+        self.letter = ''
+        if shape == 'rook':
+            self.letter = 'R'
+        if shape == 'knight':
+            self.letter = 'N'
+        if shape == 'bishop':
+            self.letter = 'B'
+        if shape == 'king':
+            self.letter = 'K'
+        if shape == 'queen':
+            self.letter = 'Q'
+
+    def promote(self, shape='queen'):
+        self.shape = shape
         if shape == 'rook':
             self.letter = 'R'
         if shape == 'knight':
@@ -34,3 +47,4 @@ class Piece:
             self.letter = 'Q'
         else:
             self.letter = ''
+        self.label = color_names[self.color] + shape_names[shape]

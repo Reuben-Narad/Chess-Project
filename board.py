@@ -26,6 +26,7 @@ class Board:
         self.turn = turn
         self.data.index = self.data.index + 1
         self.last_board = None
+        self.next_board = None
 
     def place_piece(self, file, rank, color='empty', shape=None):
         self.data[file][rank] = Piece(file, rank, color, shape)
@@ -41,10 +42,17 @@ class Board:
                 self.place_piece(self.colnames[k], j)
         self.turn = 'white'
 
+    def empty_board(self):
+        for j in range(1, 9):
+            for k in range(8):
+                self.place_piece(self.colnames[k], j)
+
     def execute_move(self, move):
         self.last_board = deepcopy(self)
         piece = self.data[move.start_file][move.start_rank]
         self.data[move.end_file][move.end_rank] = piece
+        if move.promotes:
+            piece.promote()
         piece.rank = move.end_rank
         piece.file = move.end_file
         self.data[move.start_file][move.start_rank] = Piece(move.start_file, move.start_rank)
@@ -54,6 +62,7 @@ class Board:
     def go_back(self):
         # reverts last move
         if self.last_board is not None:
+            self.next_board = deepcopy(self)
             self.data = self.last_board.data
             self.turn = self.last_board.turn
             self.last_board = self.last_board.last_board
@@ -82,8 +91,8 @@ class Board:
 test_board = Board(data1, 'black')
 test_board.set_board()
 test_board.turn = 'white'
-
-for move in range(15):
-    test_board.execute_move(list_moves(test_board)[random.randrange(len(list_moves(test_board)))])
+test_board.place_piece('e', 4, 'white', 'rook')
+#test_board.place_piece('e', 5, 'black', 'pawn')
 test_board.summarise()
+list_moves(test_board, display=True)
 
