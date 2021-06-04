@@ -5,6 +5,7 @@ from detection import *
 import numpy as np
 from copy import deepcopy
 import random
+import time as tm
 
 data1 = {
     'a': [None]*8,
@@ -91,8 +92,9 @@ class Board:
 test_board = Board(data1, 'black')
 test_board.set_board()
 test_board.turn = 'white'
-test_board.place_piece('e', 4, 'white', 'rook')
 #test_board.place_piece('e', 5, 'black', 'pawn')
 test_board.summarise()
-list_moves(test_board, display=True)
-
+for turn in range(15):
+    test_board.execute_move(list_moves(test_board)[random.randrange(len(list_moves(test_board)))])
+    test_board.summarise()
+    tm.sleep(2)
