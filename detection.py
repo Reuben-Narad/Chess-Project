@@ -1,42 +1,6 @@
 from move import *
-
-
-def list_moves(board, display=False):
-    available_moves = []
-    for file in board.data:
-        for piece in board.data[file]:
-            if piece.color == board.turn:
-                if piece.shape == 'pawn':
-                    available_moves.extend(
-                        pawn_detect(piece, board)
-                    )
-                if piece.shape == 'rook':
-                    available_moves.extend(
-                        rook_detect(piece, board)
-                    )
-                if piece.shape == 'bishop':
-                    available_moves.extend(
-                        bishop_detect(piece, board)
-                    )
-                if piece.shape == 'queen':
-                    available_moves.extend(
-                        queen_detect(piece, board)
-                    )
-                if piece.shape == 'knight':
-                    available_moves.extend(
-                       knight_detect(piece, board)
-                    )
-                if piece.shape == 'king':
-                    available_moves.extend(
-                       king_detect(piece, board)
-                    )
-    if display:
-        a = []
-        for move in available_moves:
-            a.append(move.label)
-        print(a)
-    return available_moves
-
+from copy import deepcopy
+from move_filters import *
 
 def pawn_detect(piece, board):
     moves = []
@@ -59,13 +23,12 @@ def pawn_detect(piece, board):
         moves.append(Move(piece, piece.rank + (2 * direction), piece.file))
 
     # for taking
-    if file(piece.file, 'right') != 'out':
-        if board.data[file(piece.file, 'right')][piece.rank + direction].color == opposite[piece.color]:
-            moves.append(Move(piece, piece.rank + direction, file(piece.file, 'right'), take=True))
-    if file(piece.file, 'left') != 'out':
-        if board.data[file(piece.file, 'left')][piece.rank + direction].color == opposite[piece.color]:
-            moves.append(Move(piece, piece.rank + direction, file(piece.file, 'left'), take=True))
-
+    for side in ['left', 'right']:
+        peek = look_at(piece, board, file(piece.file, side), piece.rank + direction)
+        if peek == 'take':
+            moves.append(Move(piece, piece.rank + direction, file(piece.file, side), take=True))
+        if peek == 'xK':
+            moves.append(Move(piece, piece.rank + direction, file(piece.file, side), xK=True))
     return moves
 
 
@@ -326,7 +289,67 @@ def look_at(piece, board, file, rank):
         return 'block'
 
 
-# def check_detect(board, move):
+def list_moves(board, display=False, flipped=False, remove_illegal=True, checks=True):
+    available_moves = []
+    for file in board.data:
+        for piece in board.data[file]:
+            if (piece.color == board.turn and flipped==False) or\
+                    (piece.color == opposite[board.turn] and flipped == True):
+                if piece.shape == 'pawn':
+                    available_moves.extend(
+                        pawn_detect(piece, board)
+                    )
+                if piece.shape == 'rook':
+                    available_moves.extend(
+                        rook_detect(piece, board)
+                    )
+                if piece.shape == 'bishop':
+                    available_moves.extend(
+                        bishop_detect(piece, board)
+                    )
+                if piece.shape == 'queen':
+                    available_moves.extend(
+                        queen_detect(piece, board)
+                    )
+                if piece.shape == 'knight':
+                    available_moves.extend(
+                       knight_detect(piece, board)
+                    )
+                if piece.shape == 'king':
+                    available_moves.extend(
+                       king_detect(piece, board)
+                    )
+    if checks:
+        apply_checks(available_moves, board)
+    if remove_illegal:
+        legal_moves = []
+        for move in available_moves:
+            if not check_detect(board.look_forward(move, turn=True)):
+                legal_moves.append(move)
+        available_moves = legal_moves
+    if display:
+        a = []
+        for move in available_moves:
+            a.append(move.label)
+        print(a)
+    return available_moves
+
+
+def apply_checks(moves, board):
+    for move in moves:
+        forward = board.look_forward(move, turn=False)
+        if check_detect(forward):
+            move.check = True
+            move.update_label()
+
+
+def check_detect(board):
+    moves = list_moves(board, flipped=False, remove_illegal=False, display=False, checks=False)
+    check_present = False
+    for move in moves:
+        if move.xK:
+            check_present = True
+    return check_present
 
 
 # THings to check for:

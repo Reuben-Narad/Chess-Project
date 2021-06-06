@@ -48,7 +48,7 @@ class Board:
             for k in range(8):
                 self.place_piece(self.colnames[k], j)
 
-    def execute_move(self, move):
+    def execute_move(self, move, display=False, turn=True):
         self.last_board = deepcopy(self)
         piece = self.data[move.start_file][move.start_rank]
         self.data[move.end_file][move.end_rank] = piece
@@ -57,8 +57,16 @@ class Board:
         piece.rank = move.end_rank
         piece.file = move.end_file
         self.data[move.start_file][move.start_rank] = Piece(move.start_file, move.start_rank)
-        print(move.label)
-        self.turn = opposite[self.turn]
+        if display:
+            print(move.label)
+        if turn:
+            self.turn = opposite[self.turn]
+
+    def look_forward(self, move, turn=True):
+        copy = deepcopy(self)
+        copy.execute_move(move, turn=turn)
+        # copy.summarise()
+        return copy
 
     def go_back(self):
         # reverts last move
@@ -86,15 +94,27 @@ class Board:
             for m in range(1, 9):
                 display[n][m] = self.data[n][m].label
         print(display)
+        print(self.turn + ' to move')
 
 
 
 test_board = Board(data1, 'black')
 test_board.set_board()
-test_board.turn = 'white'
-#test_board.place_piece('e', 5, 'black', 'pawn')
+
+test_board.execute_move(Move(test_board.data['e'][1], 5, 'h'))
 test_board.summarise()
-for turn in range(15):
-    test_board.execute_move(list_moves(test_board)[random.randrange(len(list_moves(test_board)))])
-    test_board.summarise()
-    tm.sleep(2)
+list_moves(test_board, display=True)
+
+#test_board.look_forward(Move(test_board.data['e'][5], 6, 'e')).summarise()
+#print(check_detect(test_board.look_forward(Move(test_board.data['e'][5], 6, 'e'))))
+
+
+
+
+
+
+
+def go_crazy(board):
+    for turn in range(45):
+        board.execute_move(list_moves(board)[random.randrange(len(list_moves(board)))])
+    board.summarise()
